@@ -1,3 +1,4 @@
+-- Huy
 -- Cấu trúc Brent–Kung 16-bit
 -- Cây gồm 4 tầng reduce + 3 tầng distribute, tổng 7 tầng logic
 -- Stage 1: Pairwise combine   (G1,G0), (G3,G2), (G5,G4), (G7,G6), (G9,G8), (G11,G10), (G13,G12), (G15,G14)
