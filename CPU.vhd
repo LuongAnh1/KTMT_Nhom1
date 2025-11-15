@@ -26,7 +26,7 @@ ARCHITECTURE behavior OF SingleCycleCPU IS
 
 BEGIN
     ------------------------------------------------------------------------
-    -- 1. Program Counter
+    -- 1. Program Counter - Đức
     ------------------------------------------------------------------------
     PC_inst: ENTITY work.PC
         PORT MAP (
