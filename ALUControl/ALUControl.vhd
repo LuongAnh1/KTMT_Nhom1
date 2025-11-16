@@ -1,4 +1,4 @@
---ghdl -a ALUC.vhd
+--ghdl -a ALUControl.vhd
 --ghdl -a ALUControl_tb.vhd
 --ghdl -e ALUControl_tb
 --ghdl -r ALUControl_tb --stop-time=200ns
@@ -24,7 +24,7 @@ begin
                 ctrl := "010";
             when "01" =>  -- beq ? SUB
                 ctrl := "110";
-            when "10" =>  -- R-type ? gi?i mã funct
+            when "10" =>  -- R-type ? gi?i mï¿½ funct
                 case funct is
                     when "100000" => ctrl := "010";  -- add
                     when "100010" => ctrl := "110";  -- sub
