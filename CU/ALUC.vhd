@@ -1,15 +1,15 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity ALUC is
+entity aluco is
     Port (
         ALUOp     : in  STD_LOGIC_VECTOR(1 downto 0);  -- tu Control Unit
         func      : in  STD_LOGIC_VECTOR(5 downto 0);  -- Instruction(5 downto 0)
         ALUControl: out STD_LOGIC_VECTOR(2 downto 0)   -- mã dieu khien ALU: 3-bit
     );
-end ALUC;
+end aluco;
 
-architecture Behavioral of ALUC is
+architecture Behavioral of aluco is
 begin
 
     process(ALUOp, func)
