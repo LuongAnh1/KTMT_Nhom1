@@ -2,10 +2,11 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+-- Khai báo tín hiệu vào ra của Register File
 entity RegisterFile is
     port(
         clk      : in  std_logic;                      -- Clock
-        RegWrite : in  std_logic;                      -- Enable ghi (từ Control Unit)
+        RegWrite : in  std_logic;                      -- Cho phép ghi (từ Control Unit)
         ReadReg1 : in  std_logic_vector(4 downto 0);  -- Địa chỉ thanh ghi đọc 1 (rs)
         ReadReg2 : in  std_logic_vector(4 downto 0);  -- Địa chỉ thanh ghi đọc 2 (rt)
         WriteReg : in  std_logic_vector(4 downto 0);  -- Địa chỉ thanh ghi ghi (rd/rt)
@@ -15,10 +16,14 @@ entity RegisterFile is
     );
 end entity RegisterFile;
 
+-- Kiến trúc của Register File
 architecture rtl of RegisterFile is
-    -- Mảng 32 thanh ghi, mỗi thanh ghi 32-bit
+    -- Định nghĩa mảng 32 thanh ghi, mỗi thanh ghi 32-bit
     type reg_file_t is array (31 downto 0) of std_logic_vector(31 downto 0);
+
+    -- Tạo tín hiệu mảng thanh ghi
     signal regs : reg_file_t := (others => (others => '0'));  -- Khởi tạo tất cả = 0
+
 begin
     ------------------------------------------------------------------------
     -- Đọc bất đồng bộ (Asynchronous Read)
@@ -29,14 +34,13 @@ begin
 
     ------------------------------------------------------------------------
     -- Ghi đồng bộ (Synchronous Write)
-    -- Chỉ ghi trên cạnh lên của clock khi RegWrite = 1
+    -- Ghi chỉ xảy ra khi có cạnh lên của clock và RegWrite = 1
     ------------------------------------------------------------------------
     process(clk)
     begin
         if rising_edge(clk) then
-            if RegWrite = '1' then
-                -- Bảo vệ thanh ghi $0: không cho phép ghi vào $zero
-                if WriteReg /= "00000" then
+            if RegWrite = '1' then -- Cho phép ghi hay không
+                if WriteReg /= "00000" then -- Không ghi vào $zero
                     regs(to_integer(unsigned(WriteReg))) <= WriteData;
                 end if;
             end if;
