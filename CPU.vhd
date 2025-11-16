@@ -20,6 +20,10 @@ ARCHITECTURE behavior OF SingleCycleCPU IS
     SIGNAL Zero                      : STD_LOGIC;
     SIGNAL ALUControlSig             : STD_LOGIC_VECTOR(3 DOWNTO 0);
 
+    -- Tín hiệu cho các MUX
+    SIGNAL WriteRegAddr              : STD_LOGIC_VECTOR(4 DOWNTO 0);
+    SIGNAL ALU_B                     : STD_LOGIC_VECTOR(31 DOWNTO 0);
+
     -- Control Unit outputs
     SIGNAL RegDst, ALUSrc, MemToReg, RegWrite, MemRead, MemWrite, Branch : STD_LOGIC;
     SIGNAL ALUOp                     : STD_LOGIC_VECTOR(1 DOWNTO 0);
@@ -61,6 +65,19 @@ BEGIN
             ALUOp     => ALUOp
         );
 
+
+    ------------------------------------------------------------------------
+    -- Sign Extend (16-bit immediate -> 32-bit)
+    ------------------------------------------------------------------------
+    SignImm <= (31 DOWNTO 16 => Instruction(15)) & Instruction(15 DOWNTO 0);
+
+    ------------------------------------------------------------------------
+    -- MUX RegDst (chọn WriteReg: rd hoặc rt)
+    ------------------------------------------------------------------------
+    WriteRegAddr <= Instruction(15 DOWNTO 11) WHEN RegDst = '1' 
+                    ELSE Instruction(20 DOWNTO 16);
+
+
     ------------------------------------------------------------------------
     -- 4. Register File
     ------------------------------------------------------------------------
@@ -70,11 +87,17 @@ BEGIN
             RegWrite   => RegWrite,
             ReadReg1   => Instruction(25 DOWNTO 21),
             ReadReg2   => Instruction(20 DOWNTO 16),
-            WriteReg   => (OTHERS => '0'),  -- sẽ thay bằng MUX RegDst
+            WriteReg   => WriteRegAddr,
             WriteData  => WriteDataReg,
             ReadData1  => ReadData1,
             ReadData2  => ReadData2
         );
+
+    ------------------------------------------------------------------------
+    -- MUX ALUSrc (chọn ALU input B: ReadData2 hoặc SignImm)
+    ------------------------------------------------------------------------
+    ALU_B <= SignImm WHEN ALUSrc = '1' ELSE ReadData2;
+
 
     ------------------------------------------------------------------------
     -- 5. ALU Control
@@ -92,7 +115,7 @@ BEGIN
     ALU_inst: ENTITY work.ALU
         PORT MAP (
             A           => ReadData1,
-            B           => ReadData2,   -- sẽ qua MUX ALUSrc
+            B           => ALU_B,   
             ALUControl  => ALUControlSig,
             Result      => ALUResult,
             Zero        => Zero
