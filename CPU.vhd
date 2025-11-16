@@ -34,10 +34,10 @@ BEGIN
     ------------------------------------------------------------------------
     PC_inst: ENTITY work.PC
         PORT MAP (
-            clk => clk,
-            reset => reset,
-            PC_in => PC_in,
-            PC_out => PC_out
+            clk => clk, -- xung nhịp cho PC (in)
+            reset => reset, -- tín hiệu reset cho PC (in)
+            PC_in => PC_in, -- địa chỉ lệnh tiếp theo (in)
+            PC_out => PC_out -- địa chỉ lệnh hiện tại (out)
         );
 
     ------------------------------------------------------------------------
@@ -45,8 +45,8 @@ BEGIN
     ------------------------------------------------------------------------
     IM_inst: ENTITY work.InstructionMemory
         PORT MAP (
-            Address => PC_out,
-            Instruction => Instruction
+            Address => PC_out, -- địa chỉ lệnh từ PC (in)
+            Instruction => Instruction -- lệnh ra (out)
         );
 
     ------------------------------------------------------------------------
@@ -55,14 +55,14 @@ BEGIN
     CU_inst: ENTITY work.ControlUnit
         PORT MAP (
             opcode    => Instruction(31 DOWNTO 26),
-            RegDst    => RegDst,
-            ALUSrc    => ALUSrc,
-            MemToReg  => MemToReg,
-            RegWrite  => RegWrite,
-            MemRead   => MemRead,
-            MemWrite  => MemWrite,
-            Branch    => Branch,
-            ALUOp     => ALUOp
+            RegDst    => RegDst, -- tín hiệu chọn WriteReg
+            ALUSrc    => ALUSrc, -- tín hiệu chọn ALU input B (ReadData2 hoặc SignImm)
+            MemToReg  => MemToReg, -- tín hiệu chọn dữ liệu ghi vào Register File (ALUResult hoặc MemReadData)
+            RegWrite  => RegWrite, -- tín hiệu cho phép ghi vào Register File
+            MemRead   => MemRead, -- tín hiệu đọc từ Data Memory
+            MemWrite  => MemWrite, -- tín hiệu ghi vào Data Memory
+            Branch    => Branch, -- tín hiệu nhánh
+            ALUOp     => ALUOp -- tín hiệu điều khiển ALU
         );
 
 
@@ -74,6 +74,8 @@ BEGIN
     ------------------------------------------------------------------------
     -- MUX RegDst (chọn WriteReg: rd hoặc rt)
     ------------------------------------------------------------------------
+    -- Nếu RegDst = 1 ~ R-type thì chọn rd (Instruction[15:11])
+    -- Ngược lại chọn rt ~ I-type (Instruction[20:16])
     WriteRegAddr <= Instruction(15 DOWNTO 11) WHEN RegDst = '1' 
                     ELSE Instruction(20 DOWNTO 16);
 
@@ -83,18 +85,19 @@ BEGIN
     ------------------------------------------------------------------------
     RF_inst: ENTITY work.RegisterFile
         PORT MAP (
-            clk        => clk,
-            RegWrite   => RegWrite,
-            ReadReg1   => Instruction(25 DOWNTO 21),
-            ReadReg2   => Instruction(20 DOWNTO 16),
-            WriteReg   => WriteRegAddr,
-            WriteData  => WriteDataReg,
-            ReadData1  => ReadData1,
-            ReadData2  => ReadData2
+            clk        => clk, -- xung nhịp cho Register File (in)
+            RegWrite   => RegWrite, -- tín hiệu từ Control Unit (Cho phép ghi hay không) (in)
+            ReadReg1   => Instruction(25 DOWNTO 21), -- rs: thanh ghi nguồn 1 (in)
+            ReadReg2   => Instruction(20 DOWNTO 16), -- rt: thanh ghi nguồn 2 (in)
+            WriteReg   => WriteRegAddr, -- tín hiệu từ MUX RegDst (chọn rd hoặc rt) (in)
+            WriteData  => WriteDataReg, -- dữ liệu ghi vào thanh ghi đích (in)
+            ReadData1  => ReadData1, -- dữ liệu đọc từ thanh ghi nguồn 1 (out)
+            ReadData2  => ReadData2 -- dữ liệu đọc từ thanh ghi nguồn 2 (out)
         );
 
+    
     ------------------------------------------------------------------------
-    -- MUX ALUSrc (chọn ALU input B: ReadData2 hoặc SignImm)
+    -- MUX ALUSrc (chọn ALU input B: ReadData2 ~ rd (R-type) hoặc SignImm ~ immediate (I-type))
     ------------------------------------------------------------------------
     ALU_B <= SignImm WHEN ALUSrc = '1' ELSE ReadData2;
 
@@ -104,9 +107,9 @@ BEGIN
     ------------------------------------------------------------------------
     ALUC_inst: ENTITY work.ALUControl
         PORT MAP (
-            ALUOp      => ALUOp,
-            funct      => Instruction(5 DOWNTO 0),
-            ALUControl => ALUControlSig
+            ALUOp      => ALUOp, -- tín hiệu từ Control Unit (in)
+            funct      => Instruction(5 DOWNTO 0), -- phần funct của lệnh R-type (in)
+            ALUControl => ALUControlSig -- tín hiệu điều khiển ALU (out)
         );
 
     ------------------------------------------------------------------------
@@ -114,11 +117,11 @@ BEGIN
     ------------------------------------------------------------------------
     ALU_inst: ENTITY work.ALU
         PORT MAP (
-            A           => ReadData1,
-            B           => ALU_B,   
-            ALUControl  => ALUControlSig,
-            Result      => ALUResult,
-            Zero        => Zero
+            A           => ReadData1, -- từ Register File (in)
+            B           => ALU_B,   -- từ MUX ALUSrc (ReadData2 hoặc Immediate) (in)
+            ALUControl  => ALUControlSig, -- từ ALU Control (in)
+            Result      => ALUResult, -- kết quả ALU (out)
+            Zero        => Zero -- tín hiệu Zero (out)
         );
 
     ------------------------------------------------------------------------
@@ -126,12 +129,12 @@ BEGIN
     ------------------------------------------------------------------------
     DM_inst: ENTITY work.DataMemory
         PORT MAP (
-            clk        => clk,
-            MemRead    => MemRead,
-            MemWrite   => MemWrite,
-            Address    => ALUResult,
-            WriteData  => ReadData2,
-            ReadData   => MemReadData
+            clk        => clk, -- xung nhịp cho Data Memory (in)
+            MemRead    => MemRead, -- Cho phép đọc từ Data Memory (in)
+            MemWrite   => MemWrite, -- Cho phép ghi vào Data Memory (in)
+            Address    => ALUResult, -- địa chỉ ô nhớ cần đọc/ghi từ ALU (in)
+            WriteData  => ReadData2, -- dữ liệu cần ghi vào Data Memory từ Register File (in)
+            ReadData   => MemReadData -- dữ liệu đọc từ Data Memory (out)
         );
 
     ------------------------------------------------------------------------
@@ -139,10 +142,10 @@ BEGIN
     ------------------------------------------------------------------------
     WB_mux: ENTITY work.MUX_WriteBack
         PORT MAP (
-            ALUResult  => ALUResult,
-            ReadData   => MemReadData,
-            MemToReg   => MemToReg,
-            WriteData  => WriteDataReg
+            ALUResult  => ALUResult, -- kết quả từ ALU (in)
+            ReadData   => MemReadData, -- dữ liệu từ Data Memory (in)
+            MemToReg   => MemToReg, -- tín hiệu từ Control Unit (in)
+            WriteData  => WriteDataReg -- dữ liệu ghi vào Register File (out)
         );
 
     ------------------------------------------------------------------------

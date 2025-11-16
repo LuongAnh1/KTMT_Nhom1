@@ -1,3 +1,6 @@
+-- Dữ liệu code sẽ nạp từ test bench
+-- Hoặc từ data.mem (nếu có)
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -26,7 +29,7 @@ architecture rtl of DataMemory is
 begin
     ------------------------------------------------------------------------
     -- Chuyển đổi địa chỉ byte thành word index
-    -- Địa chỉ byte: 0x00, 0x04, 0x08, 0x0C, ...
+    -- Địa chỉ byte: 0x...00, 0x...04, 0x...08, 0x...0C, ...
     -- Word index:   0,    1,    2,    3,    ...
     -- Sử dụng bit [11:2] của Address, bỏ qua bit [1:0] (luôn = 00)
     ------------------------------------------------------------------------
