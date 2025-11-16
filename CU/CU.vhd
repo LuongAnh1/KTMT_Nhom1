@@ -27,7 +27,7 @@ ARCHITECTURE Behavioral OF ControlUnit IS
 BEGIN
     process(opcode)
     BEGIN
-        -- M?c ??nh t?t c? tín hi?u b?ng 0
+        -- Mac dinh tat ca tín hieu bang 0
         RegDst   <= '0';
         ALUSrc   <= '0';
         MemToReg <= '0';
