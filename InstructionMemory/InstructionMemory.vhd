@@ -23,6 +23,7 @@ architecture Behavioral of InstructionMemory is
     -- ROM: Mảng hằng các lệnh MIPS (32-bit)
     -----------------------------------------------------------
     type ROM_ARRAY is array (0 to 255) of STD_LOGIC_VECTOR(31 downto 0);
+    -- Vị trí nhập lệnh vào ROM
     constant ROM : ROM_ARRAY := (
         0 => x"8C220004", -- lw $2, 4($1)
         1 => x"00432020", -- add $4, $2, $3
@@ -34,8 +35,10 @@ architecture Behavioral of InstructionMemory is
 begin
 
     -----------------------------------------------------------
-    -- Xuất lệnh tương ứng với Address(31 downto 2)
-    -- >>2 để chuyển địa chỉ byte thành chỉ số word trong ROM
+    -- Xuất lệnh tương ứng với Address(31 downto 2) 
+    -- Bỏ 2 bít cuối vì 2 bít cuối là chỉ tới vị trí thứ mấy trong từ 4 byte
+    -- Quy trình: hex => nhị phân => lấy 31 đến 2 => chuyển sang số nguyên 
+    -- Thực hiện dịch phải 2 bit (tương ứng với việc nhân 4 byte) để chuyển địa chỉ byte thành chỉ số word trong ROM
     -----------------------------------------------------------
     Instruction <= ROM(to_integer(unsigned(Address(31 downto 2))));
 

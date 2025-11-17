@@ -1,3 +1,6 @@
+-- B1: Nhập lệnh dưới dạng mã hex vào Instruction Memory (ROM)
+-- B2: Kết nối các khối để tạo thành CPU đơn chu kỳ hoàn chỉnh
+-- Biên dịch CPU đơn chu kỳ:
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.NUMERIC_STD.ALL;
