@@ -1,37 +1,37 @@
 v 4
-file . "CPU_tb.vhd" "9d26f73c6d70647af45a281fc89c506d78d9a2d5" "20251118101452.126":
-  entity singlecyclecpu_tb at 1( 0) + 0 on 57;
-  architecture sim of singlecyclecpu_tb at 8( 118) + 0 on 58;
-file . "CPU.vhd" "1eaae861688dc25142200e341d1fca7295b01f46" "20251118101452.102":
-  entity singlecyclecpu at 10( 508) + 0 on 55;
-  architecture behavior of singlecyclecpu at 33( 1520) + 0 on 56;
-file . "MUX_WriteBack.vhd" "d3212af64474132a5d27b53b62fa589b5d6f15b4" "20251118101452.081":
-  entity mux_writeback at 1( 0) + 0 on 53;
-  architecture behavior of mux_writeback at 13( 482) + 0 on 54;
-file . "DataMemory.vhd" "feb825fa4e451a09ac7999cd435a37702386d4d8" "20251118101452.081":
-  entity datamemory at 4( 87) + 0 on 51;
-  architecture rtl of datamemory at 22( 859) + 0 on 52;
-file . "ALU.vhd" "bb62174b5c7c9dc744bb118a3b2ba54b128788e1" "20251118101452.080":
-  entity alu at 24( 876) + 0 on 49;
-  architecture behavioral of alu at 38( 1262) + 0 on 50;
-file . "ALUControl.vhd" "60b944dc0bcd42712b9152bfc45b860a57b1dd06" "20251118101452.080":
-  entity aluco at 1( 0) + 0 on 47;
-  architecture behavioral of aluco at 12( 276) + 0 on 48;
-file . "RegisterFile.vhd" "3ea700bcf9e247b032bcb8ccff560a01b2ac7e53" "20251118101452.080":
-  entity registerfile at 1( 0) + 0 on 45;
-  architecture rtl of registerfile at 20( 970) + 0 on 46;
-file . "CU.vhd" "240d5a6dce3e490eb6977c1474682c1b73e10938" "20251118101452.079":
-  entity controlunit at 8( 242) + 0 on 43;
-  architecture behavioral of controlunit at 26( 740) + 0 on 44;
-file . "InstructionMemory.vhd" "f3151d48c08cde50428baa67713f215c382ae99a" "20251118101452.079":
-  entity instructionmemory at 9( 269) + 0 on 41;
-  architecture behavioral of instructionmemory at 20( 571) + 0 on 42;
-file . "PC.vhd" "29bf1a68e1619f3f7babf8f05ed9ee5186b7bd6a" "20251118101452.079":
-  entity pc at 9( 206) + 0 on 39;
-  architecture behavioral of pc at 22( 624) + 0 on 40;
-file . "BrentKung_16.vhd" "5b0f7747c9b56d26ed226c4ddf9390ba56af4ec6" "20251118101444.932":
-  entity brentkung_16 at 1( 0) + 0 on 35;
-  architecture rtl of brentkung_16 at 15( 347) + 0 on 36;
-file . "BrentKung_32.vhd" "387cab2ea3eefee779e6f2a0299a40809b5ba60b" "20251118101444.933":
-  entity brentkung_32 at 1( 0) + 0 on 37;
-  architecture structural of brentkung_32 at 15( 346) + 0 on 38;
+file . "BrentKung_32.vhd" "387cab2ea3eefee779e6f2a0299a40809b5ba60b" "20251118105837.259":
+  entity brentkung_32 at 1( 0) + 0 on 231;
+  architecture structural of brentkung_32 at 15( 346) + 0 on 232;
+file . "BrentKung_16.vhd" "5b0f7747c9b56d26ed226c4ddf9390ba56af4ec6" "20251118105837.258":
+  entity brentkung_16 at 1( 0) + 0 on 229;
+  architecture rtl of brentkung_16 at 15( 347) + 0 on 230;
+file . "PC.vhd" "29bf1a68e1619f3f7babf8f05ed9ee5186b7bd6a" "20251118105843.170":
+  entity pc at 9( 206) + 0 on 233;
+  architecture behavioral of pc at 22( 624) + 0 on 234;
+file . "InstructionMemory.vhd" "f3151d48c08cde50428baa67713f215c382ae99a" "20251118105843.170":
+  entity instructionmemory at 9( 269) + 0 on 235;
+  architecture behavioral of instructionmemory at 20( 571) + 0 on 236;
+file . "CU.vhd" "240d5a6dce3e490eb6977c1474682c1b73e10938" "20251118105843.170":
+  entity controlunit at 8( 242) + 0 on 237;
+  architecture behavioral of controlunit at 26( 740) + 0 on 238;
+file . "RegisterFile.vhd" "3ea700bcf9e247b032bcb8ccff560a01b2ac7e53" "20251118105843.171":
+  entity registerfile at 1( 0) + 0 on 239;
+  architecture rtl of registerfile at 20( 970) + 0 on 240;
+file . "ALUControl.vhd" "60b944dc0bcd42712b9152bfc45b860a57b1dd06" "20251118105843.171":
+  entity aluco at 1( 0) + 0 on 241;
+  architecture behavioral of aluco at 12( 276) + 0 on 242;
+file . "ALU.vhd" "0ed858fa38e299d31fd6b17a14b10a7343e66063" "20251118105843.173":
+  entity alu at 24( 876) + 0 on 243;
+  architecture behavioral of alu at 38( 1262) + 0 on 244;
+file . "DataMemory.vhd" "feb825fa4e451a09ac7999cd435a37702386d4d8" "20251118105843.173":
+  entity datamemory at 4( 87) + 0 on 245;
+  architecture rtl of datamemory at 22( 859) + 0 on 246;
+file . "MUX_WriteBack.vhd" "d3212af64474132a5d27b53b62fa589b5d6f15b4" "20251118105843.173":
+  entity mux_writeback at 1( 0) + 0 on 247;
+  architecture behavior of mux_writeback at 13( 482) + 0 on 248;
+file . "CPU.vhd" "71afd1bc0ef2a6ec3e27260e339c16a1abd054d6" "20251118105843.198":
+  entity singlecyclecpu at 10( 590) + 0 on 249;
+  architecture behavior of singlecyclecpu at 33( 1602) + 0 on 250;
+file . "CPU_tb.vhd" "2a9c9a2d5b0cbc3f08785b55bb30819515dba817" "20251118105843.198":
+  entity singlecyclecpu_tb at 1( 0) + 0 on 251;
+  architecture sim of singlecyclecpu_tb at 8( 118) + 0 on 252;

@@ -37,6 +37,7 @@ end entity;
 
 architecture Behavioral of ALU is
 
+
     -- Component bộ cộng 32 bit Brent-Kung
     component BrentKung_32
         port(
@@ -52,7 +53,7 @@ architecture Behavioral of ALU is
     signal Cin_sig      : STD_LOGIC := '0';
     signal Result_i : STD_LOGIC_VECTOR(31 downto 0);
 begin
-
+    
     -----------------------------------------------------------
     -- Chọn B hoặc NOT B và xác định Cin
     -----------------------------------------------------------

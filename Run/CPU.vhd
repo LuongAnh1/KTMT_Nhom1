@@ -54,6 +54,10 @@ ARCHITECTURE behavior OF SingleCycleCPU IS
     signal RF_WriteData : std_logic_vector(31 downto 0);
     signal RF_RegWrite  : std_logic;
 
+    signal Instruction_raw : std_logic_vector(31 downto 0);
+
+    signal A_for_ALU, B_for_ALU : std_logic_vector(31 downto 0);
+
 BEGIN
     
     ------------------------------------------------------------------------
@@ -70,11 +74,19 @@ BEGIN
     ------------------------------------------------------------------------
     -- 2. Instruction Memory
     ------------------------------------------------------------------------
-    IM_inst: ENTITY work.InstructionMemory
-        PORT MAP (
-            Address => PC_out, -- địa chỉ lệnh từ PC (in)
-            Instruction => Instruction -- lệnh ra (out)
+    
+
+    -- Instruction Memory output
+    IM_inst: entity work.InstructionMemory
+        port map(
+            Address     => PC_out,
+            Instruction => Instruction_raw
         );
+
+    -- Nếu đang debug → ép CPU chạy NOP (0x00000000)
+    Instruction <= (others => '0') when dbg_write_enable = '1'
+                else Instruction_raw;
+
 
     ------------------------------------------------------------------------
     -- 3. Control Unit
@@ -170,10 +182,13 @@ BEGIN
     ------------------------------------------------------------------------
     -- 6. ALU
     ------------------------------------------------------------------------
+    -- Không cho ALU chạy khi reset = '1'
+    A_for_ALU <= (others => '0') when reset = '1' else ReadData1;
+    B_for_ALU <= (others => '0') when reset = '1' else ALU_B;
     ALU_inst: ENTITY work.ALU
         PORT MAP (
-            A           => ReadData1, -- từ Register File (in)
-            B           => ALU_B,   -- từ MUX ALUSrc (ReadData2 hoặc Immediate) (in)
+            A           => A_for_ALU, -- từ Register File (in)
+            B           => B_for_ALU,   -- từ MUX ALUSrc (ReadData2 hoặc Immediate) (in)
             ALUControl  => ALUControlSig, -- từ ALU Control (in)
             Result      => ALUResult, -- kết quả ALU (out)
             Zero        => Zero -- tín hiệu Zero (out)

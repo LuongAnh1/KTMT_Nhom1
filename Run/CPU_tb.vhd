@@ -32,8 +32,7 @@ begin
     process
     begin
         reset <= '1';
-        wait for 20 ns;
-        reset <= '0';
+        
 
         ------------------------------------------------------------------
         -- INIT $t1 = 5, $t2 = 3
@@ -54,6 +53,8 @@ begin
         ------------------------------------------------------------------
         -- RUN 5 instructions, each takes 1 cycle
         ------------------------------------------------------------------
+        reset <= '0';
+        wait until rising_edge(clk);
         wait for 10 ns; -- ADD
         dbg_rreg <= "01000"; -- read $t0
         wait for 1 ns;
