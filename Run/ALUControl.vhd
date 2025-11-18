@@ -27,6 +27,11 @@ begin
                     when "100100" => ctrl := "0000";  -- and
                     when "100101" => ctrl := "0001";  -- or
                     when "101010" => ctrl := "0111";  -- slt
+
+                    when "000000" => ctrl := "1000";  -- SLL
+                    when "000010" => ctrl := "1001";  -- SRL
+                    when "000011" => ctrl := "1010";  -- SRA
+                    
                     when others   => ctrl := "0010";  -- default add
                 end case;
             when others =>

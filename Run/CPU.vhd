@@ -1,9 +1,11 @@
 -- B1: Nhập lệnh dưới dạng mã hex vào Instruction Memory (ROM)
 -- B2: Kết nối các khối để tạo thành CPU đơn chu kỳ hoàn chỉnh
--- Biên dịch CPU đơn chu kỳ:
--- ghdl -a ./PC/PC.vhd ./InstructionMemory/InstructionMemory.vhd ./CU/CU.vhd ./RegisterFile/RegisterFile.vhd ./ALUControl/ALUControl.vhd ./ALU/ALU.vhd ./DataMemory/DataMemory.vhd ./MUX_WriteBack/MUX_WriteBack.vhd CPU.vhd CPU_tb.vhd
+-- Biên dịch CPU đơn chu kỳ (Nạp dữ liệu vào thanh ghi và bắt đầu chạy ở giây thứu 300ns):
+-- ghdl -a BrentKung_16.vhd BrentKung_32.vhd
+-- ghdl -a PC.vhd InstructionMemory.vhd CU.vhd RegisterFile.vhd ALUControl.vhd ALU.vhd DataMemory.vhd MUX_WriteBack.vhd CPU.vhd CPU_tb.vhd
 -- ghdl -e SingleCycleCPU_tb
 -- ghdl -r SingleCycleCPU_tb --vcd=singlecpu.vcd --stop-time=300ns
+-- gtkwave singlecpu.vcd
 
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
@@ -11,7 +13,20 @@ USE IEEE.NUMERIC_STD.ALL;
 
 ENTITY SingleCycleCPU IS
     PORT (
-        clk, reset : IN STD_LOGIC
+        clk, reset : IN STD_LOGIC;
+
+        -- Phần hỗ trợ test bench
+        -- Tín hiệu để ghi dữ liệu cho thanh ghi từ test bench
+        dbg_write_enable : in std_logic := '0'; 
+        -- '1' thì test bench được ghi, '0' thì CPU bình thường ghi
+        dbg_write_reg    : in std_logic_vector(4 downto 0) := (others => '0'); 
+        -- Địa chỉ thanh ghi muốn ghi 
+        dbg_write_data   : in std_logic_vector(31 downto 0) := (others => '0');
+        -- Dữ liệu mà testbench muốn nạp vào thanh ghi
+        dbg_read_reg     : in std_logic_vector(4 downto 0) := (others => '0');
+        -- Testbench yêu cầu đọc nội dung của thanh ghi nào
+        dbg_read_data    : out std_logic_vector(31 downto 0) 
+        -- Xuất giá trị thanh ghi ra test bench, không ảnh hưởng đến hoạt động CPU
     );
 END ENTITY;
 
@@ -35,7 +50,12 @@ ARCHITECTURE behavior OF SingleCycleCPU IS
     SIGNAL RegDst, ALUSrc, MemToReg, RegWrite, MemRead, MemWrite, Branch : STD_LOGIC;
     SIGNAL ALUOp                     : STD_LOGIC_VECTOR(1 DOWNTO 0);
 
+    signal RF_WriteReg  : std_logic_vector(4 downto 0);
+    signal RF_WriteData : std_logic_vector(31 downto 0);
+    signal RF_RegWrite  : std_logic;
+
 BEGIN
+    
     ------------------------------------------------------------------------
     -- 1. Program Counter
     ------------------------------------------------------------------------
@@ -90,16 +110,44 @@ BEGIN
     ------------------------------------------------------------------------
     -- 4. Register File
     ------------------------------------------------------------------------
+    -- Nếu debug đang bật => test bench điều khiển ghi thanh ghi (register file)
+    -- Ngược lại CPU hoạt động bình thường
+
+    RF_RegWrite  <= dbg_write_enable or RegWrite;
+    -- Nếu testbench bật debug (dbg_write_enable = 1) → Register File sẽ cho phép ghi
+    -- Nếu CPU yêu cầu ghi (RegWrite = 1) → Register File ghi theo CPU
+    -- Nếu cả hai đều 0 → Register File không ghi
+
+    RF_WriteReg  <= dbg_write_reg  when dbg_write_enable = '1'
+                    else WriteRegAddr;
+    -- Nếu debug bật:
+    --     Testbench chọn thanh ghi cần ghi qua dbg_write_reg
+    --     CPU bị vô hiệu hóa, không chọn được
+    -- Nếu debug tắt:CPU chọn thanh ghi đích bình thường (WriteRegAddr = rd hoặc rt)
+
+    RF_WriteData <= dbg_write_data when dbg_write_enable = '1'
+                    else WriteDataReg;
+    -- Debug bật: Testbench nạp giá trị trực tiếp vào thanh ghi (dbg_write_data)
+    -- Debug tắt: CPU ghi dữ liệu tính từ MUX WriteBack (WriteDataReg)
+
     RF_inst: ENTITY work.RegisterFile
         PORT MAP (
-            clk        => clk, -- xung nhịp cho Register File (in)
-            RegWrite   => RegWrite, -- tín hiệu từ Control Unit (Cho phép ghi hay không) (in)
-            ReadReg1   => Instruction(25 DOWNTO 21), -- rs: thanh ghi nguồn 1 (in)
-            ReadReg2   => Instruction(20 DOWNTO 16), -- rt: thanh ghi nguồn 2 (in)
-            WriteReg   => WriteRegAddr, -- tín hiệu từ MUX RegDst (chọn rd hoặc rt) (in)
-            WriteData  => WriteDataReg, -- dữ liệu ghi vào thanh ghi đích (in)
-            ReadData1  => ReadData1, -- dữ liệu đọc từ thanh ghi nguồn 1 (out)
-            ReadData2  => ReadData2 -- dữ liệu đọc từ thanh ghi nguồn 2 (out)
+            clk        => clk,
+            RegWrite   => RF_RegWrite, -- tín hiệu từ Control Unit (Cho phép ghi hay không) (in)
+            ReadReg1   => Instruction(25 downto 21),
+            ReadReg2   => Instruction(20 downto 16),
+            WriteReg   => RF_WriteReg,
+            WriteData  => RF_WriteData,
+            ReadData1  => ReadData1,
+            ReadData2  => ReadData2
+            -- clk        => clk, -- xung nhịp cho Register File (in)
+            -- RegWrite   => RegWrite, -- tín hiệu từ Control Unit (Cho phép ghi hay không) (in)
+            -- ReadReg1   => Instruction(25 DOWNTO 21), -- rs: thanh ghi nguồn 1 (in)
+            -- ReadReg2   => Instruction(20 DOWNTO 16), -- rt: thanh ghi nguồn 2 (in)
+            -- WriteReg   => WriteRegAddr, -- tín hiệu từ MUX RegDst (chọn rd hoặc rt) (in)
+            -- WriteData  => WriteDataReg, -- dữ liệu ghi vào thanh ghi đích (in)
+            -- ReadData1  => ReadData1, -- dữ liệu đọc từ thanh ghi nguồn 1 (out)
+            -- ReadData2  => ReadData2 -- dữ liệu đọc từ thanh ghi nguồn 2 (out)
         );
 
     
@@ -112,7 +160,7 @@ BEGIN
     ------------------------------------------------------------------------
     -- 5. ALU Control
     ------------------------------------------------------------------------
-    ALUC_inst: ENTITY work.ALUControl
+    ALUC_inst: ENTITY work.ALUCO
         PORT MAP (
             ALUOp      => ALUOp, -- tín hiệu từ Control Unit (in)
             funct      => Instruction(5 DOWNTO 0), -- phần funct của lệnh R-type (in)
