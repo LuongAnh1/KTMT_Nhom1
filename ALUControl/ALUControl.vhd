@@ -11,29 +11,48 @@ end ALUCO;
 
 architecture Behavioral of ALUCO is
 begin
-
     process(ALUOp, funct)
-        variable ctrl : STD_LOGIC_VECTOR(3 downto 0);
     begin
         case ALUOp is
-            when "00" =>  -- lw/sw â†’ ADD
-                ctrl := "0010";
-            when "01" =>  -- beq â†’ SUB
-                ctrl := "0110";
-            when "10" =>  -- R-type â†’ dá»±a vÃ o funct
+            -------------------------------------------------
+            -- ALUOp = "00" ? ADD (lw, sw, addi)
+            -------------------------------------------------
+            when "00" =>
+                ALUControl <= "0010";  -- ADD
+            
+            -------------------------------------------------
+            -- ALUOp = "01" ? SUB (beq, bne)
+            -------------------------------------------------
+            when "01" =>
+                ALUControl <= "0110";  -- SUB
+
+            -------------------------------------------------
+            -- ALUOp = "10" ? R-type, d?a vào funct
+            -------------------------------------------------
+            when  "10" =>
                 case funct is
-                    when "100000" => ctrl := "0010";  -- add
-                    when "100010" => ctrl := "0110";  -- sub
-                    when "100100" => ctrl := "0000";  -- and
-                    when "100101" => ctrl := "0001";  -- or
-                    when "101010" => ctrl := "0111";  -- slt
-                    when others   => ctrl := "0010";  -- default add
+                    when "100000" => ALUControl <= "0010";  -- add
+                    when "100010" => ALUControl <= "0110";  -- sub
+                    when "100100" => ALUControl <= "0000";  -- and
+                    when "100101" => ALUControl <= "0001";  -- or
+                    when "101010" => ALUControl <= "0111";  -- slt
+                    when others   => ALUControl <= "1111";  -- không xác ??nh
                 end case;
+
+            -------------------------------------------------
+            -- ALUOp = "11" ? nhóm immediate logic (andi/ori/slti)
+            -------------------------------------------------
+            when "11" =>
+                case funct is
+                    when "001100" => ALUControl <= "0000";  -- andi ? AND
+                    when "001101" => ALUControl <= "0001";  -- ori  ? OR
+                    when "001010" => ALUControl <= "0111";  -- slti ? SLT
+                    when others   => ALUControl <= "1111";
+                end case;
+
             when others =>
-                ctrl := "0010";
+                ALUControl <= "1111";
+                
         end case;
-
-        ALUControl <= ctrl;
     end process;
-
 end Behavioral;
