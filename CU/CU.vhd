@@ -19,6 +19,7 @@ ENTITY ControlUnit IS
         MemRead   : OUT STD_LOGIC;
         MemWrite  : OUT STD_LOGIC;
         Branch    : OUT STD_LOGIC;
+        Jump      : OUT STD_LOGIC;  -- cho J-type
         ALUOp     : OUT STD_LOGIC_VECTOR(1 DOWNTO 0)
     );
 END ControlUnit;
@@ -38,29 +39,77 @@ BEGIN
         ALUOp    <= "00";
 
         CASE opcode IS
-            WHEN "000000" =>  -- R-type
+            -----------------------------------------
+            -- R?TYPE
+            -----------------------------------------
+            WHEN "000000" =>  
                 RegDst   <= '1';
                 ALUSrc   <= '0';
-                MemToReg <= '0';
                 RegWrite <= '1';
                 ALUOp    <= "10";
 
+
+            -----------------------------------------
+            -- I?TYPE LOAD
+            -----------------------------------------
             WHEN "100011" =>  -- lw
-                RegDst   <= '0';
                 ALUSrc   <= '1';
                 MemToReg <= '1';
                 RegWrite <= '1';
                 MemRead  <= '1';
                 ALUOp    <= "00";
 
+            -----------------------------------------
+            -- I?TYPE STORE
+            -----------------------------------------
             WHEN "101011" =>  -- sw
                 ALUSrc   <= '1';
                 MemWrite <= '1';
                 ALUOp    <= "00";
 
+            -----------------------------------------
+            -- I?TYPE BRANCH
+            -----------------------------------------
             WHEN "000100" =>  -- beq
                 Branch   <= '1';
                 ALUOp    <= "01";
+
+            WHEN "000101" =>  -- bne
+                Branch   <= '1';
+                ALUOp    <= "01"; 
+
+            -----------------------------------------
+            -- I?TYPE IMMEDIATE ARITH/LOGIC
+            -----------------------------------------
+            WHEN "001000" => -- addi
+                ALUSrc   <= '1';
+                RegWrite <= '1';
+                ALUOp    <= "00";
+
+            WHEN "001100" => -- andi
+                ALUSrc   <= '1';
+                RegWrite <= '1';
+                ALUOp    <= "11";  
+
+            WHEN "001101" => -- ori
+                ALUSrc   <= '1';
+                RegWrite <= '1';
+                ALUOp    <= "11";  
+
+            WHEN "001010" => -- slti
+                ALUSrc   <= '1';
+                RegWrite <= '1';
+                ALUOp    <= "11";
+
+            -----------------------------------------
+            -- J?TYPE
+            -----------------------------------------
+            WHEN "000010" =>  -- j
+                Jump <= '1';
+
+            WHEN "000011" =>  -- jal
+                Jump     <= '1';
+                RegWrite <= '1';  -- ghi vào $ra, nh?ng c?n RegDst m? r?ng
 
             WHEN OTHERS =>
                 NULL;
