@@ -25,30 +25,12 @@ architecture Behavioral of InstructionMemory is
     type ROM_ARRAY is array (0 to 255) of STD_LOGIC_VECTOR(31 downto 0);
     -- Vị trí nhập lệnh vào ROM
     constant ROM : ROM_ARRAY := (
-        -- R-type instructions
-        0  => x"012A4020",  -- add $t0,$t1,$t2      (10 + 5 = 15)
-        1  => x"012A4022",  -- sub $t0,$t1,$t2      (10 - 5 = 5)
-        2  => x"012A4024",  -- and $t0,$t1,$t2      (10 & 5 = 0)
-        3  => x"012A4025",  -- or  $t0,$t1,$t2      (10 | 5 = 15)
-        4  => x"016A402A",  -- slt $t0,$t3,$t2      (3 < 5 = 1)
-        
-        -- I-type arithmetic/logic instructions
-        5  => x"21280005",  -- addi $t0,$t1,5       (10 + 5 = 15)
-        6  => x"3128000F",  -- andi $t0,$t1,0x000F  (10 & 15 = 10)
-        7  => x"34A800F0",  -- ori  $t0,$t2,0x00F0  (5 | 240 = 245)
-        8  => x"292A000F",  -- slti $t0,$t1,15      (10 < 15 = 1)
-        
-        -- I-type load/store instructions
-        9  => x"8C0C0000",  -- lw   $t4,0($zero)    (load from addr 0)
-        10 => x"AC090004",  -- sw   $t1,4($zero)    (store to addr 4)
-        
-        -- I-type branch instructions (offset = 2)
-        11 => x"11290002",  -- beq  $t1,$t1,2       (branch if equal)
-        12 => x"00000000",  -- nop
-        13 => x"00000000",  -- nop
-        14 => x"152A0002",  -- bne  $t1,$t2,2       (branch if not equal)
-        
-        others => x"00000000"  -- nop
+        0 => x"012A4020",  -- add $t0,$t1,$t2
+        1 => x"012A4022",  -- sub $t0,$t1,$t2
+        2 => x"012A4024",  -- and $t0,$t1,$t2
+        3 => x"012A4025",  -- or  $t0,$t1,$t2
+        4 => x"012A402A",  -- slt $t0,$t1,$t2
+        others => x"00000000"
     );
 
 begin
