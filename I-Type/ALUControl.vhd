@@ -14,45 +14,43 @@ begin
     process(ALUOp, funct)
     begin
         case ALUOp is
+            
             -------------------------------------------------
-            -- ALUOp = "00" ? ADD (lw, sw, addi)
+            -- 00 ⇒ ADD (lw, sw, addi)
             -------------------------------------------------
             when "00" =>
                 ALUControl <= "0010";  -- ADD
-            
+
             -------------------------------------------------
-            -- ALUOp = "01" ? SUB (beq, bne)
+            -- 01 ⇒ SUB (beq, bne)
             -------------------------------------------------
             when "01" =>
                 ALUControl <= "0110";  -- SUB
 
             -------------------------------------------------
-            -- ALUOp = "10" ? R-type, d?a v�o funct
+            -- 10 ⇒ R-type
             -------------------------------------------------
-            when  "10" =>
+            when "10" =>
                 case funct is
-                    when "100000" => ALUControl <= "0010";  -- add
-                    when "100010" => ALUControl <= "0110";  -- sub
-                    when "100100" => ALUControl <= "0000";  -- and
-                    when "100101" => ALUControl <= "0001";  -- or
-                    when "101010" => ALUControl <= "0111";  -- slt
-                    when others   => ALUControl <= "1111";  -- kh�ng x�c ??nh
+                    when "100000" => ALUControl <= "0010"; -- ADD
+                    when "100010" => ALUControl <= "0110"; -- SUB
+                    when "100100" => ALUControl <= "0000"; -- AND
+                    when "100101" => ALUControl <= "0001"; -- OR
+                    when "101010" => ALUControl <= "0111"; -- SLT
+                    when others   => ALUControl <= "1111"; -- UNKNOWN
                 end case;
 
             -------------------------------------------------
-            -- ALUOp = "11" ? nh�m immediate logic (andi/ori/slti)
+            -- 11 ⇒ immediate logic
             -------------------------------------------------
             when "11" =>
-                case funct is
-                    when "001100" => ALUControl <= "0000";  -- andi ? AND
-                    when "001101" => ALUControl <= "0001";  -- ori  ? OR
-                    when "001010" => ALUControl <= "0111";  -- slti ? SLT
-                    when others   => ALUControl <= "1111";
-                end case;
+                -- cần phân loại thêm nếu muốn hỗ trợ ori/slti riêng
+                ALUControl <= "0000"; -- ví dụ: AND
 
             when others =>
                 ALUControl <= "1111";
-                
+
         end case;
     end process;
 end Behavioral;
+

@@ -78,28 +78,29 @@ BEGIN
                 Branch   <= '1';
                 ALUOp    <= "01"; 
 
-            -----------------------------------------
-            -- I?TYPE IMMEDIATE ARITH/LOGIC
-            -----------------------------------------
+            ---------------------------------------------------------
+            -- I-TYPE IMMEDIATE ARITH/LOGIC
+            ---------------------------------------------------------
             WHEN "001000" => -- addi
                 ALUSrc   <= '1';
                 RegWrite <= '1';
-                ALUOp    <= "00";
+                ALUOp    <= "00";     -- ADD
 
             WHEN "001100" => -- andi
                 ALUSrc   <= '1';
                 RegWrite <= '1';
-                ALUOp    <= "11";  
+                ALUOp    <= "11";     -- AND
 
             WHEN "001101" => -- ori
                 ALUSrc   <= '1';
                 RegWrite <= '1';
-                ALUOp    <= "11";  
+                ALUOp    <= "01";     -- OR
 
             WHEN "001010" => -- slti
                 ALUSrc   <= '1';
                 RegWrite <= '1';
-                ALUOp    <= "11";
+                ALUOp    <= "10";     -- SLT (nhưng khác R-type)
+
 
             -----------------------------------------
             -- J?TYPE
@@ -109,7 +110,7 @@ BEGIN
 
             WHEN "000011" =>  -- jal
                 Jump     <= '1';
-                RegWrite <= '1';  -- ghi v�o $ra, nh?ng c?n RegDst m? r?ng
+                RegWrite <= '1';  -- ghi v�o $ra, nh?ng c?n RegDst m? r?ng
 
             WHEN OTHERS =>
                 NULL;
