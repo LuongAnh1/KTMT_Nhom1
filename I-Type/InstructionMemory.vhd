@@ -27,7 +27,11 @@ architecture Behavioral of InstructionMemory is
     constant ROM : ROM_ARRAY := (
         0 => x"20080005",   -- addi $t0, $zero, 5
         1 => x"21090003",   -- addi $t1, $t0, 3
-        others => x"00000000"
+        2 => x"01095020",   -- add  $t2, $t0, $t1
+        3 => x"01205822",   -- sub  $t3, $t1, $t0
+        4 => x"01096024",   -- and  $t4, $t0, $t1
+        5 => x"01096825",   -- or   $t5, $t0, $t1
+        OTHERS => x"00000000"
     );
 
 begin

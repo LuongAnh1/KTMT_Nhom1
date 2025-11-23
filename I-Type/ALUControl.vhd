@@ -27,7 +27,7 @@ begin
                 ALUControl <= "0110";  -- SUB
 
             -------------------------------------------------
-            -- ALUOp = "10" ? R-type, d?a vào funct
+            -- ALUOp = "10" ? R-type, d?a vï¿½o funct
             -------------------------------------------------
             when  "10" =>
                 case funct is
@@ -36,11 +36,11 @@ begin
                     when "100100" => ALUControl <= "0000";  -- and
                     when "100101" => ALUControl <= "0001";  -- or
                     when "101010" => ALUControl <= "0111";  -- slt
-                    when others   => ALUControl <= "1111";  -- không xác ??nh
+                    when others   => ALUControl <= "1111";  -- khï¿½ng xï¿½c ??nh
                 end case;
 
             -------------------------------------------------
-            -- ALUOp = "11" ? nhóm immediate logic (andi/ori/slti)
+            -- ALUOp = "11" ? nhï¿½m immediate logic (andi/ori/slti)
             -------------------------------------------------
             when "11" =>
                 case funct is
