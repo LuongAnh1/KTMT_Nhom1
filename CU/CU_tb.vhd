@@ -1,7 +1,3 @@
--- ============================================================
--- ControlUnit_tb.vhd ? Testbench cho ControlUnit (fix std_logic_vector image)
--- ============================================================
-
 library ieee;
 use ieee.std_logic_1164.all;
 
@@ -22,7 +18,7 @@ architecture tb of ControlUnit_tb is
     signal Jump      : std_logic;
     signal ALUOp     : std_logic_vector(1 downto 0);
 
-    -- M?ng opcode ?? test
+    -- Opcode array for testing
     type opcode_array is array (natural range <>) of std_logic_vector(5 downto 0);
     type name_array   is array (natural range <>) of string(1 to 10);
 
@@ -56,7 +52,7 @@ architecture tb of ControlUnit_tb is
         "invalid"
     );
 
-    -- Hàm chuy?n std_logic_vector -> string
+    -- Function to convert std_logic_vector to string
     function slv2string(slv : std_logic_vector) return string is
         variable str : string(1 to slv'length);
     begin
