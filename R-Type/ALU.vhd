@@ -37,7 +37,6 @@ end entity;
 
 architecture Behavioral of ALU is
 
-
     -- Component bộ cộng 32 bit Brent-Kung
     component BrentKung_32
         port(
@@ -47,13 +46,24 @@ architecture Behavioral of ALU is
             Cout : out STD_LOGIC
         );
     end component;
+    -- Component bộ dịch BarrelShifter 32 bit
+    component BarrelShifter
+        port(
+            DataIn  : in  std_logic_vector(31 downto 0);
+            Shamt   : in  std_logic_vector(4 downto 0); -- số bit dịch
+            Mode    : in  std_logic_vector(1 downto 0); -- 00=SLL, 01=SRL, 10=SRA
+            DataOut : out std_logic_vector(31 downto 0)
+        );
+    end component;
+    
 
     signal B_invert     : STD_LOGIC_VECTOR(31 downto 0); 
     signal adder_result : STD_LOGIC_VECTOR(31 downto 0);
     signal Cin_sig      : STD_LOGIC := '0';
     signal Result_i : STD_LOGIC_VECTOR(31 downto 0);
+    signal shiftOut : STD_LOGIC_VECTOR(31 downto 0);
 begin
-    
+
     -----------------------------------------------------------
     -- Chọn B hoặc NOT B và xác định Cin
     -----------------------------------------------------------
@@ -92,9 +102,20 @@ begin
             Cout => open
         );
     -----------------------------------------------------------
+    -- Gọi bộ dịch BarrelShifter 32 bit
+    -----------------------------------------------------------
+    U_SHIFTER : entity work.BarrelShifter
+        port map(
+            DataIn  => A,
+            Shamt   => B(4 downto 0), -- 5 bit dịch
+            Mode    => ALUControl(1 downto 0),
+            DataOut => shiftOut -- kết quả dịch
+        );
+
+    -----------------------------------------------------------
     -- Cho ra kết quả ALU
     -----------------------------------------------------------
-    process(A, B, ALUControl, adder_result)
+    process(A, B, ALUControl, adder_result, shiftOut)
     begin
         case ALUControl is
 
@@ -120,6 +141,16 @@ begin
 
             when "1100" =>  -- NOR
                 Result_i <= NOT (A OR B);
+                
+            when "0100" =>  -- XOR
+                Result_i <= A XOR B;
+
+            when "1000"  =>  -- SLL
+                Result_i <= shiftOut;
+            when "1001"  =>  -- SRL
+                Result_i <= shiftOut;
+            when "1010" =>  -- SRA
+                Result_i <= shiftOut;
 
             when others =>
                 Result_i <= (others => '0');
