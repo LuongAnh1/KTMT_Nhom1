@@ -1,10 +1,12 @@
 -- B1: Nhập lệnh dưới dạng mã hex vào Instruction Memory (ROM)
 -- B2: Kết nối các khối để tạo thành CPU đơn chu kỳ hoàn chỉnh
 -- Biên dịch CPU đơn chu kỳ (Nạp dữ liệu vào thanh ghi và bắt đầu chạy ở giây thứu 300ns):
--- ghdl -a BrentKung_16.vhd BrentKung_32.vhd
+-- del *.o
+-- del -Recurse -Force work
+-- ghdl -a BarrelShifter.vhd BrentKung_16.vhd BrentKung_32.vhd
 -- ghdl -a PC.vhd InstructionMemory.vhd CU.vhd RegisterFile.vhd ALUControl.vhd ALU.vhd DataMemory.vhd MUX_WriteBack.vhd CPU.vhd CPU_tb.vhd
 -- ghdl -e SingleCycleCPU_tb
--- ghdl -r SingleCycleCPU_tb --vcd=singlecpu.vcd --stop-time=300ns
+-- ghdl -r SingleCycleCPU_tb --vcd=singlecpu.vcd --stop-time=500ns
 -- gtkwave singlecpu.vcd
 
 LIBRARY IEEE;
@@ -34,8 +36,15 @@ ARCHITECTURE behavior OF SingleCycleCPU IS
     SIGNAL ALU_B                     : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
     -- Control Unit outputs
-    SIGNAL RegDst, ALUSrc, MemToReg, RegWrite, MemRead, MemWrite, Branch : STD_LOGIC;
-    SIGNAL ALUOp                     : STD_LOGIC_VECTOR(1 DOWNTO 0);
+    SIGNAL RegDst, MemToReg, RegWrite, MemRead, MemWrite, Branch : STD_LOGIC;
+    SIGNAL ALUOp, ALUSrc                     : STD_LOGIC_VECTOR(1 DOWNTO 0);
+
+    -- Tín hiệu dịch bit (shift amount)
+    signal Shamt_value, check    : STD_LOGIC_VECTOR(4 downto 0);
+    signal Shamt_ext_32 : STD_LOGIC_VECTOR(31 downto 0);
+    -- Tín hiệu điều khiển ALU_A MUX
+    signal ALU_A_Input : STD_LOGIC_VECTOR(31 downto 0);
+    signal ALUSrcA_ctrl : STD_LOGIC; -- Tín hiệu điều khiển mới từ Control Unit (ví dụ: '0' cho ReadData1, '1' cho ReadData2)
 
 BEGIN
     ------------------------------------------------------------------------
@@ -57,20 +66,21 @@ BEGIN
             Address => PC_out, -- địa chỉ lệnh từ PC (in)
             Instruction => Instruction -- lệnh ra (out)
         );
-
     ------------------------------------------------------------------------
     -- 3. Control Unit
     ------------------------------------------------------------------------
     CU_inst: ENTITY work.ControlUnit
         PORT MAP (
             opcode    => Instruction(31 DOWNTO 26),
+            funct_in  => Instruction(5 DOWNTO 0), -- Truyền funct vào Control Unit
             RegDst    => RegDst, -- tín hiệu chọn WriteReg
-            ALUSrc    => ALUSrc, -- tín hiệu chọn ALU input B (ReadData2 hoặc SignImm)
+            ALUSrc_ctrl    => ALUSrc, -- tín hiệu chọn ALU input B (ReadData2 hoặc SignImm hoặc shamt)
             MemToReg  => MemToReg, -- tín hiệu chọn dữ liệu ghi vào Register File (ALUResult hoặc MemReadData)
             RegWrite  => RegWrite, -- tín hiệu cho phép ghi vào Register File
             MemRead   => MemRead, -- tín hiệu đọc từ Data Memory
             MemWrite  => MemWrite, -- tín hiệu ghi vào Data Memory
             Branch    => Branch, -- tín hiệu nhánh
+            ALUSrcA   => ALUSrcA_ctrl, -- tín hiệu chọn đầu vào A cho ALU
             ALUOp     => ALUOp -- tín hiệu điều khiển ALU
         );
 
@@ -104,13 +114,6 @@ BEGIN
             ReadData2  => ReadData2 -- dữ liệu đọc từ thanh ghi nguồn 2 (out)
         );
 
-    
-    ------------------------------------------------------------------------
-    -- MUX ALUSrc (chọn ALU input B: ReadData2 ~ rd (R-type) hoặc SignImm ~ immediate (I-type))
-    ------------------------------------------------------------------------
-    ALU_B <= SignImm WHEN ALUSrc = '1' ELSE ReadData2;
-
-
     ------------------------------------------------------------------------
     -- 5. ALU Control
     ------------------------------------------------------------------------
@@ -118,16 +121,30 @@ BEGIN
         PORT MAP (
             ALUOp      => ALUOp, -- tín hiệu từ Control Unit (in)
             funct      => Instruction(5 DOWNTO 0), -- phần funct của lệnh R-type (in)
+            opcode    => Instruction(31 DOWNTO 26), -- phần opcode của lệnh I-type (in)
             ALUControl => ALUControlSig -- tín hiệu điều khiển ALU (out)
         );
 
+    ------------------------------------------------------------------------
+    -- MUX ALUSrc 
+    -- chọn ALU input B: ReadData2 ~ rd (R-type) hoặc SignImm ~ immediate (I-type)
+    -- Chọn ALU input A dựa trên ALUSrcA_ctrl từ Control Unit (Phân biệt giữa dịch bít và các lệnh khác)
+    ------------------------------------------------------------------------
+    Shamt_value <= Instruction(10 downto 6);
+    Shamt_ext_32 <= (31 downto 5 => '0') & Shamt_value; -- Mở rộng shamt 5-bit thành 32-bit bằng cách điền '0'
+    ALU_B <= ReadData2      WHEN ALUSrc = "00" ELSE   -- R-type (arithmetic/logic)
+            SignImm        WHEN ALUSrc = "01" ELSE   -- I-type (addi, lw, sw)
+            Shamt_ext_32   WHEN ALUSrc = "10" ELSE   -- R-type (shifts)
+            (others => '0'); -- Trường hợp mặc định
+    
+    ALU_A_Input <= ReadData1 WHEN ALUSrcA_ctrl = '0' ELSE ReadData2;
     ------------------------------------------------------------------------
     -- 6. ALU
     ------------------------------------------------------------------------
     ALU_inst: ENTITY work.ALU
         PORT MAP (
-            A           => ReadData1, -- từ Register File (in)
-            B           => ALU_B,   -- từ MUX ALUSrc (ReadData2 hoặc Immediate) (in)
+            A           => ALU_A_Input, -- từ MUX ALUSrcA (ReadData1 hoặc ReadData2) (in)
+            B           => ALU_B,   -- từ MUX ALUSrc (ReadData2 hoặc Immediate hoặc ) (in)
             ALUControl  => ALUControlSig, -- từ ALU Control (in)
             Result      => ALUResult, -- kết quả ALU (out)
             Zero        => Zero -- tín hiệu Zero (out)

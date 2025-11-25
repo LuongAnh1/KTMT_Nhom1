@@ -94,7 +94,7 @@ BEGIN
             WHEN "001000" => -- addi
                 ALUSrc_ctrl   <= "01";
                 RegWrite <= '1';
-                ALUOp    <= "00";     -- ADD
+                ALUOp    <= "00";  
 
             WHEN "001100" => -- andi
                 ALUSrc_ctrl   <= "01";
@@ -109,7 +109,7 @@ BEGIN
             WHEN "001010" => -- slti
                 ALUSrc_ctrl   <= "01";
                 RegWrite <= '1';
-                ALUOp    <= "11";     -- SLT (nhưng khác R-type)
+                ALUOp    <= "11";   
 
 
             -----------------------------------------
@@ -120,7 +120,7 @@ BEGIN
 
             WHEN "000011" =>  -- jal
                 Jump     <= '1';
-                RegWrite <= '1';  -- ghi v�o $ra, nh?ng c?n RegDst m? r?ng
+                RegWrite <= '1';  
 
             WHEN OTHERS =>
                 NULL;

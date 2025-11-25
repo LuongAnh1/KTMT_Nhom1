@@ -121,6 +121,7 @@ BEGIN
         PORT MAP (
             ALUOp      => ALUOp, -- tín hiệu từ Control Unit (in)
             funct      => Instruction(5 DOWNTO 0), -- phần funct của lệnh R-type (in)
+            opcode    => Instruction(31 DOWNTO 26), -- phần opcode của lệnh I-type (in)
             ALUControl => ALUControlSig -- tín hiệu điều khiển ALU (out)
         );
 
