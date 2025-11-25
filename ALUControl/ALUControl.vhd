@@ -5,6 +5,7 @@ entity ALUCO is
     Port (
         ALUOp      : in  STD_LOGIC_VECTOR(1 downto 0);
         funct      : in  STD_LOGIC_VECTOR(5 downto 0);
+        opcode     : in  STD_LOGIC_VECTOR(5 downto 0);
         ALUControl : out STD_LOGIC_VECTOR(3 downto 0)   -- 4-bit
     );
 end ALUCO;
@@ -48,7 +49,7 @@ begin
             -- ALUOp = "11" ? nh�m immediate logic (andi/ori/slti)
             -------------------------------------------------
             when "11" =>
-                case funct is
+                case opcode is
                     when "001100" => ALUControl <= "0000";  -- andi ? AND
                     when "001101" => ALUControl <= "0001";  -- ori  ? OR
                     when "001010" => ALUControl <= "0111";  -- slti ? SLT

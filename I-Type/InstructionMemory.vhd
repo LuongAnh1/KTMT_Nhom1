@@ -25,12 +25,18 @@ architecture Behavioral of InstructionMemory is
     type ROM_ARRAY is array (0 to 255) of STD_LOGIC_VECTOR(31 downto 0);
     -- Vị trí nhập lệnh vào ROM
     constant ROM : ROM_ARRAY := (
-        0 => x"20080005",   -- addi $t0, $zero, 5
-        1 => x"21090003",   -- addi $t1, $t0, 3
-        2 => x"01095020",   -- add  $t2, $t0, $t1
-        3 => x"01285822",   -- sub  $t3, $t1, $t0
-        4 => x"01096024",   -- and  $t4, $t0, $t1
-        5 => x"01096825",   -- or   $t5, $t0, $t1
+        ------------------------------------------------------------------
+        -- Khởi tạo giá trị cho các thanh ghi bằng addi
+        ------------------------------------------------------------------
+        0 => x"20080005",   -- addi $t0, $zero, 5   
+        1 => x"2009000C",   -- addi $t1, $zero, 12    
+        2 => x"200A0014",   -- addi $t2, $zero, 20 
+
+        3 => x"312B000F",   -- andi $t3, $t1, 0x0F
+        4 => x"356C0055",   -- ori  $t4, $t3, 0x55
+
+        5 => x"8D0D0004",   -- lw $t5, 4($t0)
+        6 => x"AD2D0008",   -- sw $t5, 8($t1)
         OTHERS => x"00000000"
     );
 
