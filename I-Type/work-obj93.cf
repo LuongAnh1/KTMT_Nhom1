@@ -1,0 +1,40 @@
+v 4
+file . "CPU_tb.vhd" "22e6ae4779bd78dd48fd9d503977ca981f5d036b" "20251125040607.354":
+  entity singlecyclecpu_tb at 1( 0) + 0 on 35;
+  architecture sim of singlecyclecpu_tb at 8( 118) + 0 on 36;
+file . "CPU.vhd" "802587f19ec45cae7c1428743806e4f617a6d530" "20251125040607.352":
+  entity singlecyclecpu at 12( 649) + 0 on 33;
+  architecture behavior of singlecyclecpu at 22( 819) + 0 on 34;
+file . "MUX_WriteBack.vhd" "d3212af64474132a5d27b53b62fa589b5d6f15b4" "20251125040607.300":
+  entity mux_writeback at 1( 0) + 0 on 31;
+  architecture behavior of mux_writeback at 13( 482) + 0 on 32;
+file . "DataMemory.vhd" "feb825fa4e451a09ac7999cd435a37702386d4d8" "20251125040607.300":
+  entity datamemory at 4( 87) + 0 on 29;
+  architecture rtl of datamemory at 22( 859) + 0 on 30;
+file . "ALU.vhd" "51f0e85e9e3c41a2d6cbb54d682393455e3effbb" "20251125040607.299":
+  entity alu at 24( 876) + 0 on 27;
+  architecture behavioral of alu at 38( 1262) + 0 on 28;
+file . "ALUControl.vhd" "5083718d29e3db99785863a2578c0beedf8db5ed" "20251125040607.298":
+  entity aluco at 1( 0) + 0 on 25;
+  architecture behavioral of aluco at 13( 332) + 0 on 26;
+file . "RegisterFile.vhd" "3ea700bcf9e247b032bcb8ccff560a01b2ac7e53" "20251125040607.296":
+  entity registerfile at 1( 0) + 0 on 23;
+  architecture rtl of registerfile at 20( 970) + 0 on 24;
+file . "CU.vhd" "7bec56a13bc2f971031965c5ddcb57337c19226b" "20251125040607.295":
+  entity controlunit at 8( 242) + 0 on 21;
+  architecture behavioral of controlunit at 30( 1066) + 0 on 22;
+file . "InstructionMemory.vhd" "a3d89629eefa468113f9e8f67c6b59420d504376" "20251125040607.295":
+  entity instructionmemory at 9( 269) + 0 on 19;
+  architecture behavioral of instructionmemory at 20( 571) + 0 on 20;
+file . "PC.vhd" "29bf1a68e1619f3f7babf8f05ed9ee5186b7bd6a" "20251125040607.294":
+  entity pc at 9( 206) + 0 on 17;
+  architecture behavioral of pc at 22( 624) + 0 on 18;
+file . "BarrelShifter.vhd" "a1661b2619a207ffc1583d6ff7b3a821b38bec4a" "20251125040605.130":
+  entity barrelshifter at 1( 0) + 0 on 11;
+  architecture behavioral of barrelshifter at 14( 394) + 0 on 12;
+file . "BrentKung_16.vhd" "5b0f7747c9b56d26ed226c4ddf9390ba56af4ec6" "20251125040605.131":
+  entity brentkung_16 at 1( 0) + 0 on 13;
+  architecture rtl of brentkung_16 at 15( 347) + 0 on 14;
+file . "BrentKung_32.vhd" "387cab2ea3eefee779e6f2a0299a40809b5ba60b" "20251125040605.132":
+  entity brentkung_32 at 1( 0) + 0 on 15;
+  architecture structural of brentkung_32 at 15( 346) + 0 on 16;

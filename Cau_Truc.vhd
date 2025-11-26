@@ -83,7 +83,7 @@
                 │ Instruction[31:0]        │ │
                 ▼                          │ │
         ┌──────────────────────────────────────────┐
-        │                 Control Unit             │
+        │              Control Unit                │
         ├──────────────────────────────────────────┤
         │ RegDst │ ALUSrc │ MemtoReg │ RegWrite    │
         │ MemRead│ MemWrite│ Branch  │ ALUOp[1:0]  │
