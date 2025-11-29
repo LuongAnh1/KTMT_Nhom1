@@ -15,15 +15,7 @@ USE IEEE.NUMERIC_STD.ALL;
 
 ENTITY SingleCycleCPU IS
     PORT (
-        clk, reset : IN STD_LOGIC;
-        -- Debug outputs
-        dbg_PC_out      : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-        dbg_PC_in       : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-        dbg_Zero        : OUT STD_LOGIC;
-        dbg_Branch      : OUT STD_LOGIC;
-        dbg_BranchType  : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-        dbg_PCSrc       : OUT STD_LOGIC;
-        dbg_BranchTarget: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+        clk, reset : IN STD_LOGIC
     );
 END ENTITY;
 
@@ -210,16 +202,5 @@ BEGIN
     
     -- MUX chọn PC tiếp theo
     PC_in <= BranchTarget WHEN PCSrc = '1' ELSE PC_plus_4;
-
-    ------------------------------------------------------------------------
-    -- Debug port assignments
-    ------------------------------------------------------------------------
-    dbg_PC_out       <= PC_out;
-    dbg_PC_in        <= PC_in;
-    dbg_Zero         <= Zero;
-    dbg_Branch       <= Branch;
-    dbg_BranchType   <= BranchType;
-    dbg_PCSrc        <= PCSrc;
-    dbg_BranchTarget <= BranchTarget;
 
 END ARCHITECTURE;
