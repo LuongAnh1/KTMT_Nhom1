@@ -21,6 +21,7 @@ ENTITY ControlUnit IS
         MemRead   : OUT STD_LOGIC;
         MemWrite  : OUT STD_LOGIC;
         Branch    : OUT STD_LOGIC;
+        BranchType: OUT STD_LOGIC_VECTOR(1 DOWNTO 0); -- 00=beq, 01=bne
         Jump      : OUT STD_LOGIC;  -- cho J-type
         ALUSrcA   : OUT STD_LOGIC; -- Mới: Chọn đầu vào A cho ALU (0=ReadData1, 1=ReadData2)
         ALUOp     : OUT STD_LOGIC_VECTOR(1 DOWNTO 0)
@@ -39,6 +40,7 @@ BEGIN
         MemRead  <= '0';
         MemWrite <= '0';
         Branch   <= '0';
+        BranchType <= "00"; -- Mặc định beq
         ALUSrcA  <= '0'; -- Mặc định là ReadData1
         ALUOp    <= "00";
 
@@ -82,10 +84,12 @@ BEGIN
             -----------------------------------------
             WHEN "000100" =>  -- beq
                 Branch   <= '1';
+                BranchType <= "00"; -- beq
                 ALUOp    <= "01";
 
             WHEN "000101" =>  -- bne
                 Branch   <= '1';
+                BranchType <= "01"; -- bne
                 ALUOp    <= "01"; 
 
             ---------------------------------------------------------
