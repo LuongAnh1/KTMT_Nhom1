@@ -25,11 +25,18 @@ architecture Behavioral of InstructionMemory is
     type ROM_ARRAY is array (0 to 255) of STD_LOGIC_VECTOR(31 downto 0);
     -- Vị trí nhập lệnh vào ROM
     constant ROM : ROM_ARRAY := (
-        0 => x"012A4020",  -- add $t0,$t1,$t2
-        1 => x"012A4022",  -- sub $t0,$t1,$t2
-        2 => x"012A4024",  -- and $t0,$t1,$t2
-        3 => x"012A4025",  -- or  $t0,$t1,$t2
-        4 => x"012A402A",  -- slt $t0,$t1,$t2
+        -- Test beq và bne
+        0 => x"20080005",  -- addi $t0, $zero, 5     # $t0 = 5
+        1 => x"20090005",  -- addi $t1, $zero, 5     # $t1 = 5
+        2 => x"200A0003",  -- addi $t2, $zero, 3     # $t2 = 3
+        3 => x"11090002",  -- beq $t0, $t1, label1   # branch nếu $t0 == $t1 (sẽ nhảy)
+        4 => x"200B0001",  -- addi $t3, $zero, 1     # $t3 = 1 (bị bỏ qua)
+        5 => x"200B0002",  -- addi $t3, $zero, 2     # $t3 = 2 (bị bỏ qua)
+        6 => x"200C00FF",  -- label1: addi $t4, $zero, 255  # $t4 = 255
+        7 => x"150A0002",  -- bne $t0, $t2, label2   # branch nếu $t0 != $t2 (sẽ nhảy)
+        8 => x"200D0001",  -- addi $t5, $zero, 1     # $t5 = 1 (bị bỏ qua)
+        9 => x"200D0002",  -- addi $t5, $zero, 2     # $t5 = 2 (bị bỏ qua)
+        10 => x"200E00AA", -- label2: addi $t6, $zero, 170  # $t6 = 170
         others => x"00000000"
     );
 
