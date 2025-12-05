@@ -36,8 +36,14 @@ ARCHITECTURE behavior OF SingleCycleCPU IS
     SIGNAL ALU_B                     : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
     -- Control Unit outputs
-    SIGNAL RegDst, MemToReg, RegWrite, MemRead, MemWrite, Branch : STD_LOGIC;
+    SIGNAL RegDst, MemToReg, RegWrite, MemRead, MemWrite, Branch, Jump : STD_LOGIC;
     SIGNAL ALUOp, ALUSrc                     : STD_LOGIC_VECTOR(1 DOWNTO 0);
+    SIGNAL BranchType                        : STD_LOGIC_VECTOR(1 DOWNTO 0);
+    
+    -- Branch signals
+    SIGNAL BranchTarget                      : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    SIGNAL PCSrc                             : STD_LOGIC;
+    SIGNAL PC_plus_4                         : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
     -- Tín hiệu dịch bit (shift amount)
     signal Shamt_value, check    : STD_LOGIC_VECTOR(4 downto 0);
@@ -74,12 +80,14 @@ BEGIN
             opcode    => Instruction(31 DOWNTO 26),
             funct_in  => Instruction(5 DOWNTO 0), -- Truyền funct vào Control Unit
             RegDst    => RegDst, -- tín hiệu chọn WriteReg
-            ALUSrc_ctrl    => ALUSrc, -- tín hiệu chọn ALU input B (ReadData2 hoặc SignImm hoặc shamt)
+            ALUSrc_ctrl    => ALUSrc, -- tín hiệu chọn ALU input B (ReadData hoặc SignImm hoặc shamt)
             MemToReg  => MemToReg, -- tín hiệu chọn dữ liệu ghi vào Register File (ALUResult hoặc MemReadData)
             RegWrite  => RegWrite, -- tín hiệu cho phép ghi vào Register File
             MemRead   => MemRead, -- tín hiệu đọc từ Data Memory
             MemWrite  => MemWrite, -- tín hiệu ghi vào Data Memory
             Branch    => Branch, -- tín hiệu nhánh
+            BranchType => BranchType, -- phân biệt beq (00) và bne (01)
+            Jump      => Jump, -- tín hiệu jump (J-type)
             ALUSrcA   => ALUSrcA_ctrl, -- tín hiệu chọn đầu vào A cho ALU
             ALUOp     => ALUOp -- tín hiệu điều khiển ALU
         );
@@ -176,8 +184,23 @@ BEGIN
         );
 
     ------------------------------------------------------------------------
-    -- 9. PC Update (tăng +4 đơn giản)
+    -- 9. Branch Logic và PC Update
     ------------------------------------------------------------------------
-    PC_in <= STD_LOGIC_VECTOR(unsigned(PC_out) + 4);
+    -- Tính PC + 4
+    PC_plus_4 <= STD_LOGIC_VECTOR(unsigned(PC_out) + 4);
+    
+    -- Tính Branch Target Address: PC + 4 + (SignImm << 2)
+    BranchTarget <= STD_LOGIC_VECTOR(unsigned(PC_plus_4) + unsigned(SignImm(29 DOWNTO 0) & "00"));
+    
+    -- Quyết định Branch hay không
+    -- beq: branch khi Zero = 1 (A == B)
+    -- bne: branch khi Zero = 0 (A != B)
+    PCSrc <= '1' WHEN (Branch = '1' AND 
+                      ((BranchType = "00" AND Zero = '1') OR    -- beq
+                       (BranchType = "01" AND Zero = '0')))     -- bne
+             ELSE '0';
+    
+    -- MUX chọn PC tiếp theo
+    PC_in <= BranchTarget WHEN PCSrc = '1' ELSE PC_plus_4;
 
 END ARCHITECTURE;
