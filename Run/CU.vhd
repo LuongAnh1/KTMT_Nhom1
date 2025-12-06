@@ -13,10 +13,10 @@ ENTITY ControlUnit IS
     PORT (
         opcode    : IN  STD_LOGIC_VECTOR(5 DOWNTO 0);
         funct_in  : IN  STD_LOGIC_VECTOR(5 DOWNTO 0); -- Thêm funct vào đây
-        RegDst    : OUT STD_LOGIC;
+        RegDst      : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        MemToReg    : OUT STD_LOGIC_VECTOR(1 DOWNTO 0); 
         -- ALUSrc    : OUT STD_LOGIC;
         ALUSrc_ctrl : OUT STD_LOGIC_VECTOR(1 DOWNTO 0); -- Mới: Điều khiển 2-bit
-        MemToReg  : OUT STD_LOGIC;
         RegWrite  : OUT STD_LOGIC;
         MemRead   : OUT STD_LOGIC;
         MemWrite  : OUT STD_LOGIC;
@@ -32,24 +32,26 @@ ARCHITECTURE Behavioral OF ControlUnit IS
 BEGIN
     process(opcode, funct_in)
     BEGIN
-        -- Mac dinh tat ca tin hieu bang 0
-        RegDst   <= '0';
-        ALUSrc_ctrl   <= "00";
-        MemToReg <= '0';
-        RegWrite <= '0';
-        MemRead  <= '0';
-        MemWrite <= '0';
-        Branch   <= '0';
-        BranchType <= "00"; -- Mặc định beq
-        ALUSrcA  <= '0'; -- Mặc định là ReadData1
-        ALUOp    <= "00";
+        -- ==== MẶC ĐỊNH (Tránh Latch) ====
+        RegDst      <= "00";   -- 00: rt, 01: rd, 10: $ra
+        ALUSrc_ctrl <= "00";  -- 00: ReadData2, 01: Imm, 10: Shamt
+        MemToReg    <= "00";   -- 00: ALU, 01: Mem, 10: PC+4
+        RegWrite    <= '0';
+        MemRead     <= '0';
+        MemWrite    <= '0';
+        Branch      <= '0';
+        BranchType  <= "00";
+        Jump        <= '0';
+        ALUSrcA     <= '0';   -- 0: ReadData1 (rs), 1: ReadData2 (rt - cho Shift)
+        ALUOp       <= "00";  -- 00: Add/Load/Store, 01: Branch, 10: R-type, 11: I-type Logic
+
 
         CASE opcode IS
             -----------------------------------------
             -- R?TYPE
             -----------------------------------------
             WHEN "000000" =>  -- R-TYPE
-                RegDst   <= '1';
+                RegDst   <= "01";  -- Chọn rd
                 RegWrite <= '1';
                 ALUOp    <= "10";
                 CASE funct_in IS
@@ -65,8 +67,8 @@ BEGIN
             -- I?TYPE LOAD
             -----------------------------------------
             WHEN "100011" =>  -- lw
-                ALUSrc_ctrl   <= "01";
-                MemToReg <= '1';
+                ALUSrc_ctrl   <= "01"; -- Chọn Imm_ext_32
+                MemToReg <= "01"; -- Chọn dữ liệu từ Memory
                 RegWrite <= '1';
                 MemRead  <= '1';
                 ALUOp    <= "00";
@@ -76,7 +78,7 @@ BEGIN
             -----------------------------------------
             WHEN "101011" =>  -- sw
                 ALUSrc_ctrl   <= "01";
-                MemWrite <= '1';
+                MemWrite <= '1'; -- Chọn ghi dữ liệu vào Memory
                 ALUOp    <= "00";
 
             -----------------------------------------
@@ -122,9 +124,11 @@ BEGIN
             WHEN "000010" =>  -- j
                 Jump <= '1';
 
-            WHEN "000011" =>  -- jal
+            WHEN "000011" => -- jal
                 Jump     <= '1';
-                RegWrite <= '1';  
+                RegWrite <= '1';      -- Cho phép ghi
+                RegDst   <= "10";     -- Chọn thanh ghi 31 ($ra)
+                MemToReg <= "10";     -- Chọn dữ liệu là PC+4  
 
             WHEN OTHERS =>
                 NULL;

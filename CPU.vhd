@@ -36,14 +36,18 @@ ARCHITECTURE behavior OF SingleCycleCPU IS
     SIGNAL ALU_B                     : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
     -- Control Unit outputs
-    SIGNAL RegDst, MemToReg, RegWrite, MemRead, MemWrite, Branch, Jump : STD_LOGIC;
-    SIGNAL ALUOp, ALUSrc                     : STD_LOGIC_VECTOR(1 DOWNTO 0);
+    SIGNAL RegWrite, MemRead, MemWrite, Branch, Jump : STD_LOGIC;
+    SIGNAL ALUOp, ALUSrc, RegDst, MemToReg           : STD_LOGIC_VECTOR(1 DOWNTO 0);
     SIGNAL BranchType                        : STD_LOGIC_VECTOR(1 DOWNTO 0);
     
-    -- Branch signals
+    -- Tín hiệu cho Branch
     SIGNAL BranchTarget                      : STD_LOGIC_VECTOR(31 DOWNTO 0);
     SIGNAL PCSrc                             : STD_LOGIC;
     SIGNAL PC_plus_4                         : STD_LOGIC_VECTOR(31 DOWNTO 0);
+
+    -- Tín hiệu cho Jump
+    SIGNAL JumpAddress               : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    SIGNAL PC_Branch_Decision        : STD_LOGIC_VECTOR(31 DOWNTO 0); -- Tín hiệu trung gian 
 
     -- Tín hiệu dịch bit (shift amount)
     signal Shamt_value, check    : STD_LOGIC_VECTOR(4 downto 0);
@@ -101,10 +105,12 @@ BEGIN
     ------------------------------------------------------------------------
     -- MUX RegDst (chọn WriteReg: rd hoặc rt)
     ------------------------------------------------------------------------
-    -- Nếu RegDst = 1 ~ R-type thì chọn rd (Instruction[15:11])
-    -- Ngược lại chọn rt ~ I-type (Instruction[20:16])
-    WriteRegAddr <= Instruction(15 DOWNTO 11) WHEN RegDst = '1' 
-                    ELSE Instruction(20 DOWNTO 16);
+    -- Nếu RegDst = 01 ~ R-type thì chọn rd (Instruction[15:11])
+    --              00 rt ~ I-type (Instruction[20:16])
+    --              10 ~ $ra (31) cho jal
+    WriteRegAddr <= Instruction(20 DOWNTO 16) WHEN RegDst = "00" ELSE
+                    Instruction(15 DOWNTO 11) WHEN RegDst = "01" ELSE
+                    "11111"; -- Chọn thanh ghi 31 (cho jal)
 
 
     ------------------------------------------------------------------------
@@ -179,12 +185,13 @@ BEGIN
         PORT MAP (
             ALUResult  => ALUResult, -- kết quả từ ALU (in)
             ReadData   => MemReadData, -- dữ liệu từ Data Memory (in)
-            MemToReg   => MemToReg, -- tín hiệu từ Control Unit (in)
+            PC_plus_4  => PC_plus_4,   -- Kết nối tín hiệu PC+4 vào đây
+            MemToReg   => MemToReg,    -- Tín hiệu điều khiển 2 bit từ Control Unit (in)
             WriteData  => WriteDataReg -- dữ liệu ghi vào Register File (out)
         );
 
     ------------------------------------------------------------------------
-    -- 9. Branch Logic và PC Update
+    -- 9. Branch Logic, Jump Logic và PC Update
     ------------------------------------------------------------------------
     -- Tính PC + 4
     PC_plus_4 <= STD_LOGIC_VECTOR(unsigned(PC_out) + 4);
@@ -192,15 +199,20 @@ BEGIN
     -- Tính Branch Target Address: PC + 4 + (SignImm << 2)
     BranchTarget <= STD_LOGIC_VECTOR(unsigned(PC_plus_4) + unsigned(SignImm(29 DOWNTO 0) & "00"));
     
-    -- Quyết định Branch hay không
-    -- beq: branch khi Zero = 1 (A == B)
-    -- bne: branch khi Zero = 0 (A != B)
+    -- Tính Jump Address: { (PC+4)[31:28], Instruction[25:0], "00" }
+    JumpAddress <= PC_plus_4(31 DOWNTO 28) & Instruction(25 DOWNTO 0) & "00";
+
+    -- Quyết định Branch hay không 
     PCSrc <= '1' WHEN (Branch = '1' AND 
                       ((BranchType = "00" AND Zero = '1') OR    -- beq
                        (BranchType = "01" AND Zero = '0')))     -- bne
              ELSE '0';
     
-    -- MUX chọn PC tiếp theo
-    PC_in <= BranchTarget WHEN PCSrc = '1' ELSE PC_plus_4;
+    -- MUX 1: Chọn giữa (PC+4) và (BranchTarget)
+    PC_Branch_Decision <= BranchTarget WHEN PCSrc = '1' ELSE PC_plus_4;
+
+    -- MUX 2: Chọn giữa kết quả MUX 1 và JumpAddress
+    -- Nếu Jump = '1' thì ưu tiên nhảy, ngược lại lấy kết quả của Branch/Next
+    PC_in <= JumpAddress WHEN Jump = '1' ELSE PC_Branch_Decision;
 
 END ARCHITECTURE;
