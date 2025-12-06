@@ -25,18 +25,39 @@ architecture Behavioral of InstructionMemory is
     type ROM_ARRAY is array (0 to 255) of STD_LOGIC_VECTOR(31 downto 0);
     -- Vị trí nhập lệnh vào ROM
     constant ROM : ROM_ARRAY := (
-        -- Test beq và bne
-        0 => x"20080005",  -- addi $t0, $zero, 5     # $t0 = 5
-        1 => x"20090005",  -- addi $t1, $zero, 5     # $t1 = 5
-        2 => x"200A0003",  -- addi $t2, $zero, 3     # $t2 = 3
-        3 => x"11090002",  -- beq $t0, $t1, label1   # branch nếu $t0 == $t1 (sẽ nhảy)
-        4 => x"200B0001",  -- addi $t3, $zero, 1     # $t3 = 1 (bị bỏ qua)
-        5 => x"200B0002",  -- addi $t3, $zero, 2     # $t3 = 2 (bị bỏ qua)
-        6 => x"200C00FF",  -- label1: addi $t4, $zero, 255  # $t4 = 255
-        7 => x"150A0002",  -- bne $t0, $t2, label2   # branch nếu $t0 != $t2 (sẽ nhảy)
-        8 => x"200D0001",  -- addi $t5, $zero, 1     # $t5 = 1 (bị bỏ qua)
-        9 => x"200D0002",  -- addi $t5, $zero, 2     # $t5 = 2 (bị bỏ qua)
-        10 => x"200E00AA", -- label2: addi $t6, $zero, 170  # $t6 = 170
+        -- 0: addi $t0, $zero, 10      ($t0 = 10)
+        0 => x"2008000A", 
+        
+        -- 1: j 4                      (Nhảy đến index 4)
+        -- Opcode j=000010. Target=4. Hex: 08000004
+        1 => x"08000004", 
+        
+        -- 2: addi $t0, $zero, 99      (TRAP: Nếu j sai, $t0 = 99)
+        2 => x"20080063",
+        
+        -- 3: addi $t0, $zero, 99      (TRAP: Lệnh rác)
+        3 => x"20080063", 
+        
+        -- 4: Label_Target_J: addi $t1, $zero, 20  ($t1 = 20)
+        4 => x"20090014",
+        
+        -- 5: jal 8                    (Nhảy đến index 8, lưu PC+4 vào $31)
+        -- Opcode jal=000011. Target=8. Hex: 0C000008
+        -- PC hiện tại là 5*4=20. PC+4 = 24 (0x18). Vậy $31 sẽ bằng 24.
+        5 => x"0C000008",
+        
+        -- 6: addi $t2, $zero, 99      (TRAP: Nếu jal sai, $t2 = 99)
+        6 => x"200A0063",
+        
+        -- 7: addi $t2, $zero, 99      (TRAP: Lệnh rác)
+        7 => x"200A0063",
+        
+        -- 8: Label_Target_JAL: addi $t3, $ra, 0   ($t3 = $ra)
+        -- Để kiểm tra xem $ra có đúng là 24 (0x18) không.
+        8 => x"23EB0000",
+        
+        -- 9: j 9                      (Vòng lặp vô tận để dừng chương trình)
+        9 => x"08000009",
         others => x"00000000"
     );
 
