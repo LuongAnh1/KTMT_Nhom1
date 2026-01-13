@@ -1,0 +1,4 @@
+v 4
+file . "CU.vhd" "b9a4f82d5ec7942312228880f38b78143debc409" "20251206151936.823":
+  entity controlunit at 8( 242) + 0 on 13;
+  architecture behavioral of controlunit at 31( 1182) + 0 on 14;

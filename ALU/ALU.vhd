@@ -1,5 +1,5 @@
 -- Biên dịch 
--- ghdl -a BrentKung_32.vhd
+-- ghdl -a BarrelShifter.vhd BrentKung_16.vhd BrentKung_32.vhd
 -- ghdl -a ALU.vhd
 -- ghdl -a ALU_tb.vhd
 
